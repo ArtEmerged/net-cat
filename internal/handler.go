@@ -11,46 +11,31 @@ import (
 	"time"
 )
 
+func (s *server) handler(conn net.Conn) {
+	s.welcome(conn)
+	name := s.getUserName(conn)
+	s.usersNotification(conn, name)
+	s.mu.Lock()
+	s.users[name] = conn
+	s.mu.Unlock()
+	conn.Write([]byte(s.allmessages))
+	s.client(conn, name)
+}
+
 func (s *server) client(conn net.Conn, name string) {
-	fmt.Println("client->start")
 	var text string
+	defer conn.Close()
 	buf := bufio.NewScanner(conn)
-	// datename := fmt.Sprintf("[%s][%s]:", time.Now().Format(dateFormat), name)
-	// conn.Write([]byte(datename))
 	for buf.Scan() {
-		fmt.Println("client->scan")
 		text = buf.Text()
-		if s.checkEmpty(text) {
-			fmt.Println("client->scan->if == true")
-			continue
-		}
 		msg := message{
 			time: time.Now().Format(dateFormat),
 			user: name,
 			text: text,
 		}
-		fmt.Println("handler:client->scan->GetMessage-> start")
-		s.GetMessage(msg)
-		fmt.Println("handler:client->scan->GetMessage-> end")
-		// datename = fmt.Sprintf("[%s][%s]:", time.Now().Format(dateFormat), name)
-		// conn.Write([]byte(datename))
+		s.getMessage(msg)
 	}
-	fmt.Println("client->end")
-}
-
-func (s *server) handler(conn net.Conn) {
-	fmt.Println("handler:welcome-> start")
-	s.welcome(conn)
-	fmt.Println("handler:getNAme-> start")
-	name := s.getUserName(conn)
-	fmt.Println("handler:usersNotification-> start")
-	s.usersNotification(conn, name)
-	s.mu.Lock()
-	s.users[name] = conn
-	s.mu.Unlock()
-	fmt.Println("handler:Write->allmessages-> start")
-	conn.Write([]byte(s.allmessages))
-	s.client(conn, name)
+	
 }
 
 func (s *server) welcome(conn net.Conn) {
@@ -67,7 +52,9 @@ func (s *server) getUserName(conn net.Conn) string {
 	buf := bufio.NewScanner(conn)
 	for buf.Scan() {
 		name = buf.Text()
-		if !s.checkName(name) {
+		if len(name) > 8 {
+			conn.Write([]byte(nameIncorr + nameMsg))
+		} else if !s.checkName(name) {
 			conn.Write([]byte(nameIncorr + nameMsg))
 		} else if _, ok := s.users[name]; ok {
 			conn.Write([]byte(nameUsed + nameMsg))
@@ -79,13 +66,20 @@ func (s *server) getUserName(conn net.Conn) string {
 }
 
 func (s *server) usersNotification(conn net.Conn, name string) {
-	fmt.Println("usersNotification")
 	msg := message{
 		text: joinMsg,
 		user: name,
 		time: "",
 	}
-	s.GetMessage(msg)
+	s.getMessage(msg)
+}
+func (s *server) usersLeft(conn net.Conn, name string) {
+	msg := message{
+		text: leftMsg,
+		user: name,
+		time: "",
+	}
+	s.getMessage(msg)
 }
 
 func (s *server) checkName(name string) bool {
