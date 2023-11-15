@@ -12,30 +12,33 @@ func (s *server) getMessage(msg message) {
 	s.messages <- msg
 }
 
-func (s *server) switchMsg() {
-	for {
-		select {
-		case msg := <-s.messages:
-			s.write(msg)
-		case <-s.live:
-		}
-	}
-}
+// func (s *server) switchMsg() {
+// 	for {
+// 		select {
+// 		case msg := <-s.messages:
+// 			s.write(msg)
+// 		case <-s.live:
+// 		}
+// 	}
+// }
 
-func (s *server) write(msg message) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	text := s.toString(msg)
-	time := time.Now().Format(dateFormat)
-	var datename string
-	for name, userAddr := range s.users {
-		datename = fmt.Sprintf("\n[%s][%s]:", time, name)
-		if msg.user == name {
-			userAddr.Write([]byte(datename[1:]))
-			continue
+func (s *server) write() {
+	for {
+		msg := <-s.messages
+		s.mu.Lock()
+		text := s.toString(msg)
+		time := time.Now().Format(dateFormat)
+		var datename string
+		for name, userAddr := range s.users {
+			datename = fmt.Sprintf("\n[%s][%s]:", time, name)
+			if msg.user == name {
+				userAddr.Write([]byte(datename[1:]))
+				continue
+			}
+			userAddr.Write([]byte(text))
+			userAddr.Write([]byte(datename))
 		}
-		userAddr.Write([]byte(text))
-		userAddr.Write([]byte(datename))
+		s.mu.Unlock()
 	}
 }
 

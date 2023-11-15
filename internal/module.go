@@ -26,11 +26,6 @@ type message struct {
 	text string
 }
 
-// type user struct {
-// 	name string
-// 	msg  message
-// }
-
 type server struct {
 	listen      net.Listener
 	messages    chan message

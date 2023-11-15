@@ -2,7 +2,6 @@ package internal
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"net"
 	"os"
@@ -24,7 +23,7 @@ func (s *server) handler(conn net.Conn) {
 
 func (s *server) client(conn net.Conn, name string) {
 	var text string
-	defer conn.Close()
+	defer s.closeconn(conn, name)
 	buf := bufio.NewScanner(conn)
 	for buf.Scan() {
 		text = buf.Text()
@@ -35,7 +34,6 @@ func (s *server) client(conn net.Conn, name string) {
 		}
 		s.getMessage(msg)
 	}
-	
 }
 
 func (s *server) welcome(conn net.Conn) {
@@ -73,12 +71,17 @@ func (s *server) usersNotification(conn net.Conn, name string) {
 	}
 	s.getMessage(msg)
 }
-func (s *server) usersLeft(conn net.Conn, name string) {
+
+func (s *server) closeconn(conn net.Conn, name string) {
+	s.mu.Lock()
+	defer conn.Close()
+	defer s.mu.Unlock()
 	msg := message{
 		text: leftMsg,
 		user: name,
 		time: "",
 	}
+	delete(s.users, name)
 	s.getMessage(msg)
 }
 

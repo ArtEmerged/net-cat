@@ -20,7 +20,7 @@ func StartServer(port string) {
 		users:    make(map[string]net.Conn),
 		mu:       sync.RWMutex{},
 	}
-	go s.switchMsg()
+	go s.write()
 	for {
 		conn, errConn := s.listen.Accept()
 		if errConn != nil {
