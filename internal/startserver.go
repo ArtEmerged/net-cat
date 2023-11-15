@@ -17,9 +17,10 @@ func StartServer(port string) {
 	s := &server{
 		listen:   li,
 		messages: make(chan message),
-		users:    make(map[user]net.Conn),
+		users:    make(map[string]net.Conn),
 		mu:       sync.RWMutex{},
 	}
+	go s.switchMsg()
 	for {
 		conn, errConn := s.listen.Accept()
 		if errConn != nil {
@@ -32,5 +33,4 @@ func StartServer(port string) {
 		}
 		go s.handler(conn)
 	}
-
 }
