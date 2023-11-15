@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"sync"
 )
 
 func StartServer(port string) {
 	li, errStart := net.Listen("tcp", ":"+port)
 	if errStart != nil {
-		log.Println(errStart)
+		log.Println("This port is already in use")
+		os.Exit(0)
 	}
 
 	fmt.Println(listenMsg + port)
