@@ -10,9 +10,9 @@ import (
 func StartServer(port string) {
 	li, errStart := net.Listen("tcp", ":"+port)
 	if errStart != nil {
-		log.Fatal(errStart)
+		log.Println(errStart)
 	}
-	defer li.Close()
+
 	fmt.Println(listenMsg + port)
 	s := &server{
 		listen:   li,
@@ -20,11 +20,13 @@ func StartServer(port string) {
 		users:    make(map[string]net.Conn),
 		mu:       sync.RWMutex{},
 	}
+	defer s.closeServer()
 	go s.write()
 	for {
 		conn, errConn := s.listen.Accept()
 		if errConn != nil {
-			log.Fatal(errConn)
+			conn.Close()
+			continue
 		}
 		if len(s.users) > 10 {
 			conn.Write([]byte(fullConn))
@@ -32,5 +34,13 @@ func StartServer(port string) {
 			}
 		}
 		go s.handler(conn)
+	}
+}
+
+func (s *server) closeServer() {
+	defer s.listen.Close()
+	for _, conn := range s.users {
+		conn.Write([]byte(exitServer))
+		conn.Close()
 	}
 }

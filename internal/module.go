@@ -18,6 +18,7 @@ const (
 	listenMsg     = "Listening on the port :"
 	welcomeMsg    = "static/welcome.txt"
 	fullConn      = "The server's full. Do you want to wait for someone to come out?\n"
+	exitServer    = "Sorry. The server has been suspended"
 )
 
 type message struct {
@@ -27,10 +28,11 @@ type message struct {
 }
 
 type server struct {
-	listen      net.Listener
-	messages    chan message
-	live        chan message
-	users       map[string]net.Conn
-	allmessages string
-	mu          sync.RWMutex
+	listen       net.Listener
+	messages     chan message
+	live         chan message
+	users        map[string]net.Conn
+	allmessages  string
+	serverClosed bool
+	mu           sync.RWMutex
 }

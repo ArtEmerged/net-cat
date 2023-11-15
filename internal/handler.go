@@ -22,8 +22,8 @@ func (s *server) handler(conn net.Conn) {
 }
 
 func (s *server) client(conn net.Conn, name string) {
+	defer s.closeConn(conn, name)
 	var text string
-	defer s.closeconn(conn, name)
 	buf := bufio.NewScanner(conn)
 	for buf.Scan() {
 		text = buf.Text()
@@ -72,7 +72,7 @@ func (s *server) usersNotification(conn net.Conn, name string) {
 	s.getMessage(msg)
 }
 
-func (s *server) closeconn(conn net.Conn, name string) {
+func (s *server) closeConn(conn net.Conn, name string) {
 	s.mu.Lock()
 	defer conn.Close()
 	defer s.mu.Unlock()
@@ -93,4 +93,13 @@ func (s *server) checkName(name string) bool {
 func (s *server) checkEmpty(text string) bool {
 	trimmedText := strings.TrimSpace(text)
 	return len(trimmedText) == 0
+}
+
+func (s *server) checkRune(text string) bool {
+	for _, letter := range text {
+		if letter < 32 {
+			return true
+		}
+	}
+	return false
 }

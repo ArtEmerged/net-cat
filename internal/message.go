@@ -6,27 +6,14 @@ import (
 )
 
 func (s *server) getMessage(msg message) {
-	if s.checkEmpty(msg.text) {
-		return
-	}
 	s.messages <- msg
 }
-
-// func (s *server) switchMsg() {
-// 	for {
-// 		select {
-// 		case msg := <-s.messages:
-// 			s.write(msg)
-// 		case <-s.live:
-// 		}
-// 	}
-// }
 
 func (s *server) write() {
 	for {
 		msg := <-s.messages
 		s.mu.Lock()
-		text := s.toString(msg)
+		text, ok := s.toString(msg)
 		time := time.Now().Format(dateFormat)
 		var datename string
 		for name, userAddr := range s.users {
@@ -35,20 +22,25 @@ func (s *server) write() {
 				userAddr.Write([]byte(datename[1:]))
 				continue
 			}
-			userAddr.Write([]byte(text))
-			userAddr.Write([]byte(datename))
+			if ok {
+				userAddr.Write([]byte(text))
+				userAddr.Write([]byte(datename))
+			}
 		}
 		s.mu.Unlock()
 	}
 }
 
-func (s *server) toString(msg message) string {
+func (s *server) toString(msg message) (string, bool) {
+	if s.checkEmpty(msg.text) || s.checkRune(msg.text) {
+		return fmt.Sprintf("\n%s%s", msg.user, msg.text), false
+	}
 	if msg.time == "" {
-		return fmt.Sprintf("\n%s%s", msg.user, msg.text)
+		return fmt.Sprintf("\n%s%s", msg.user, msg.text), true
 	}
 	text := fmt.Sprintf("\n[%s][%s]:%s", msg.time, msg.user, msg.text)
 	s.saveMessage(text[1:] + "\n")
-	return text
+	return text, true
 }
 
 func (s *server) saveMessage(msg string) {

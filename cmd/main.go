@@ -2,8 +2,9 @@ package main
 
 import (
 	"log"
-	"net-cat/internal"
 	"os"
+
+	"net-cat/internal"
 )
 
 func main() {
