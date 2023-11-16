@@ -5,9 +5,6 @@ import (
 	"time"
 )
 
-func (s *server) getMessage(msg message) {
-	s.messages <- msg
-}
 
 func (s *server) write() {
 	for {

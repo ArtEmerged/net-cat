@@ -11,10 +11,10 @@ import (
 func StartServer(port string) {
 	li, errStart := net.Listen("tcp", ":"+port)
 	if errStart != nil {
-		log.Println("This port is already in use")
+		log.Println(portUse)
 		os.Exit(0)
 	}
-
+	defer li.Close()
 	fmt.Println(listenMsg + port)
 	s := &server{
 		listen:   li,
@@ -22,7 +22,6 @@ func StartServer(port string) {
 		users:    make(map[string]net.Conn),
 		mu:       sync.RWMutex{},
 	}
-	defer s.closeServer()
 	go s.write()
 	for {
 		conn, errConn := s.listen.Accept()
@@ -36,13 +35,5 @@ func StartServer(port string) {
 			}
 		}
 		go s.handler(conn)
-	}
-}
-
-func (s *server) closeServer() {
-	defer s.listen.Close()
-	for _, conn := range s.users {
-		conn.Write([]byte(exitServer))
-		conn.Close()
 	}
 }

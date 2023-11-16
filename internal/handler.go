@@ -32,7 +32,7 @@ func (s *server) client(conn net.Conn, name string) {
 			user: name,
 			text: text,
 		}
-		s.getMessage(msg)
+		s.messages <- msg
 	}
 }
 
@@ -69,7 +69,7 @@ func (s *server) usersNotification(conn net.Conn, name string) {
 		user: name,
 		time: "",
 	}
-	s.getMessage(msg)
+	s.messages <- msg
 }
 
 func (s *server) closeConn(conn net.Conn, name string) {
@@ -82,7 +82,7 @@ func (s *server) closeConn(conn net.Conn, name string) {
 		time: "",
 	}
 	delete(s.users, name)
-	s.getMessage(msg)
+	s.messages <- msg
 }
 
 func (s *server) checkName(name string) bool {

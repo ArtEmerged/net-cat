@@ -7,6 +7,7 @@ import (
 
 const (
 	DefPort       = "8989"
+	portUse       = "This port is already in use"
 	IncorrectPort = "[USAGE]: ./TCPChat $port"
 	dateFormat    = "2006-01-02 15:04:05"
 	joinMsg       = " has joined our chat..."
@@ -30,9 +31,7 @@ type message struct {
 type server struct {
 	listen       net.Listener
 	messages     chan message
-	live         chan message
 	users        map[string]net.Conn
 	allmessages  string
-	serverClosed bool
 	mu           sync.RWMutex
 }
