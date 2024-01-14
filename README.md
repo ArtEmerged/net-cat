@@ -1,5 +1,7 @@
 ![01-edu-system-blue](https://raw.githubusercontent.com/GoArtyom/study/1a66b22c5b511ccce94b582481a45dfd7f001d3a/alem.svg)
-# net-cat
+# Net-Cat
+
+![preview](./static/preview.gif)
 
 ## Description
 
@@ -25,7 +27,7 @@ This program work similar to how the original NetCat works, i.e. it creates a gr
 ### How to install
 
 ```
-git clone git@git.01.alem.school:aecheist/net-cat.git && cd net-cat/
+git clone git@github.com:ArtEmerged/net-cat.git && cd net-cat/
 
 go build -o TCPChat cmd/main.go 
 ```
@@ -120,10 +122,8 @@ _)      \.___.,|     .'
 [2020-01-20 16:04:57][Lee]:^C
 ```
 
-### Audit link
 
-* <a href="https://github.com/alem-01/public/tree/58a361cb2d98e9da144efeecf15435d1fc3bcd6a/subjects/net-cat/audit" target="_blank">net-cat audit</a>
 
 ### Autor
 
-* <a href="https://github.com/GoArtyom" target="_blank">GitHub.com/GoArtyom</a>
+* <a href="https://github.com/ArtEmerged" target="_blank">GitHub.com/ArtEmerged</a>
